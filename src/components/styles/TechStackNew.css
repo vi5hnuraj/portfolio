@@ -142,14 +142,14 @@
 }
 
 .techstack-item span {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 5px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 6px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 50px;
+  max-width: 62px;
 }
 
 .techstack-item:hover span {
@@ -163,17 +163,18 @@
   }
   
   .techstack-item {
-    width: 50px;
-    height: 62px;
+    width: 56px;
+    height: 70px;
   }
   
   .techstack-item img {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
   }
   
   .techstack-item span {
-    font-size: 8px;
+    font-size: 10px;
+    max-width: 52px;
   }
 }
 

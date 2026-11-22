@@ -13,6 +13,7 @@ import Work from "./Work";
 import TechStackNew from "./TechStackNew";
 import CallToAction from "./CallToAction";
 import setSplitText from "./utils/splitText";
+import "./styles/responsive.css";
 
 const MainContainer = ({ children }: PropsWithChildren) => {
   const [isDesktopView, setIsDesktopView] = useState<boolean>(
@@ -36,9 +37,9 @@ const MainContainer = ({ children }: PropsWithChildren) => {
       <Cursor />
       <Navbar />
       <SocialIcons />
-      {children}
       <div className="container-main container-content">
-        <Landing />
+        {/* The 3D character lives inside the hero so it scrolls away with it */}
+        <Landing>{children}</Landing>
         <About />
         <Stats />
         <WhatIDo />

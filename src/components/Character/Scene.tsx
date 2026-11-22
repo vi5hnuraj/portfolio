@@ -27,11 +27,19 @@ const Scene = () => {
       const aspect = container.width / container.height;
       const scene = sceneRef.current;
 
-      const renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: window.devicePixelRatio < 2,
-        powerPreference: "high-performance",
-      });
+      let renderer: THREE.WebGLRenderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: window.devicePixelRatio < 2,
+          powerPreference: "high-performance",
+        });
+      } catch (error) {
+        // No WebGL (old GPU, disabled, remote desktop): keep the page usable.
+        console.warn("WebGL unavailable — skipping the 3D scene.", error);
+        setLoading(100);
+        return;
+      }
       renderer.setSize(container.width, container.height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -42,7 +50,9 @@ const Scene = () => {
       camera.position.z = 10;
       const initialCameraX = 0;
       camera.position.set(initialCameraX, 13.1, 24.7);
-      camera.zoom = aspect < 1 ? 0.6 : 1.1;
+      // Phones use a shorter canvas, so pull the camera back to keep the
+      // whole figure in frame instead of cropping the head.
+      camera.zoom = aspect < 1 ? 0.55 : 1.1;
       camera.updateProjectionMatrix();
 
       let headBone: THREE.Object3D | null = null;
@@ -55,7 +65,13 @@ const Scene = () => {
       let progress = setProgress((value) => setLoading(value));
       const { loadCharacter } = setCharacter(renderer, scene, camera);
 
-      loadCharacter().then((gltf) => {
+      loadCharacter()
+        .catch(() => {
+          // Model could not be fetched/decoded — finish loading gracefully.
+          setLoading(100);
+          return null;
+        })
+        .then((gltf) => {
         if (gltf) {
           const animations = setAnimations(gltf);
           hoverDivRef.current && animations.hover(gltf, hoverDivRef.current);

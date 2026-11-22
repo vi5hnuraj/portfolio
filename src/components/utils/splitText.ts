@@ -9,9 +9,36 @@ interface ParaElement extends HTMLElement {
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Keep the untouched markup so a resize never splits already-split text
+// (nested split-line spans used to clip the paragraph after a resize).
+const originalHTML = new WeakMap<HTMLElement, string>();
+
+const restore = (element: HTMLElement) => {
+  if (!originalHTML.has(element)) {
+    originalHTML.set(element, element.innerHTML);
+  } else {
+    element.innerHTML = originalHTML.get(element)!;
+  }
+};
+
 export default function setSplitText() {
   ScrollTrigger.config({ ignoreMobileResize: true });
-  if (window.innerWidth < 900) return;
+
+  // Phones: put the plain text back. Otherwise text split into lines at a
+  // desktop width stays broken into those lines after the viewport shrinks.
+  if (window.innerWidth < 900) {
+    document
+      .querySelectorAll<ParaElement>(".para, .title")
+      .forEach((element) => {
+        element.anim?.progress(1).kill();
+        element.split?.revert();
+        element.anim = undefined;
+        element.split = undefined;
+        restore(element);
+      });
+    return;
+  }
+
   const paras: NodeListOf<ParaElement> = document.querySelectorAll(".para");
   const titles: NodeListOf<ParaElement> = document.querySelectorAll(".title");
 
@@ -24,6 +51,7 @@ export default function setSplitText() {
       para.anim.progress(1).kill();
       para.split?.revert();
     }
+    restore(para);
 
     para.split = new TextSplitter(para, {
       type: "lines,words",
@@ -52,6 +80,7 @@ export default function setSplitText() {
       title.anim.progress(1).kill();
       title.split?.revert();
     }
+    restore(title);
     title.split = new TextSplitter(title, {
       type: "chars,lines",
       linesClass: "split-line",

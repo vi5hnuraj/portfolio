@@ -26,7 +26,12 @@ export const LoadingProvider = ({ children }: PropsWithChildren) => {
   };
 
 
-  useEffect(() => {}, [loading]);
+  // The 3D loader drives the counter; this is only a backstop so a slow or
+  // failed model download can never leave the loading screen stuck.
+  useEffect(() => {
+    const watchdog = setTimeout(() => setLoading(100), 8000);
+    return () => clearTimeout(watchdog);
+  }, []);
 
   return (
     <LoadingContext.Provider value={value as LoadingType}>
